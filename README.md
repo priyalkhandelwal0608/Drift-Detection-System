@@ -24,6 +24,11 @@ When the monitor flags significant drift (e.g., using a Kolmogorov-Smirnov test)
 
 ---
 ##Installation 
+# Start monitoring for data drift
+python monitoring/monitor.py
+
+# Manually trigger retraining if drift is detected
+python retraining/retrain.py
 -pip install -r requirements.txt
 -python data/generate_data.py
 -python data/generate_production_data.py
