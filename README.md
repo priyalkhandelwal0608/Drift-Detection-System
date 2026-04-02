@@ -1,35 +1,76 @@
+# ML Experiment Tracking with MLflow
 
-## ML-experiment-tracking with MLflow
+An **MLOps pipeline** to monitor machine learning models in production, detect data/concept drift, trigger retraining, and track experiments with **MLflow** to maintain model performance and reproducibility.
 
-An MLOps pipeline designed to monitor machine learning models in production, detect data/concept drift, and trigger retraining to maintain model accuracy.
+---
 
-##  Project Structure
+## 🚀 Project Overview
+
+This project demonstrates a **full ML lifecycle**:
+
+1. **Data Generation** – Create synthetic reference and production datasets.  
+2. **Model Training** – Train a Random Forest model on reference data.  
+3. **Drift Detection** – Monitor incoming production data for shifts compared to reference data.  
+4. **Retraining** – Automatically retrain the model when drift is detected.  
+5. **Experiment Tracking** – Log parameters, metrics, and models with MLflow for easy comparison.  
+6. **Model Serving** – Provide predictions through a REST API using FastAPI.
+
+---
+
+## 📁 Project Structure
 
 | Directory | Description |
 | :--- | :--- |
-| **api/** | Contains `app.py` for serving the model via a REST API. |
-| **data/** | Scripts for generating synthetic training/production data and stored `.csv` files. |
-| **model/** | Stores the trained `model.pkl` and the logic in `train_model.py`. |
-| **monitoring/** | The core engine (`drift_detection.py`) that compares production vs. reference data. |
-| **retraining/** | Automated scripts to refresh the model when drift is detected. |
-
----
-##  Key Components
-
-### **Drift Detection**
-The `monitoring/drift_detection.py` script identifies shifts between `reference_data.csv` (the data the model was trained on) and incoming `production_data.csv`. This ensures the model isn't making "blind" predictions on data it no longer understands.
-
-### **Retraining Loop**
-When the monitor flags significant drift (e.g., using a Kolmogorov-Smirnov test), `retraining/retrain.py` is triggered to update `model.pkl` using the most recent production data samples.
+| **api/** | REST API serving the model (`app.py`) with a frontend template. |
+| **data/** | Scripts for generating synthetic datasets (`generate_data.py`, `generate_production_data.py`). |
+| **model/** | Model training logic (`train_model.py`) and saved model (`model.pkl`). |
+| **monitoring/** | Drift detection engine (`drift_detection.py`, `monitor.py`). |
+| **retraining/** | Automated retraining script (`retrain.py`). |
+| **templates/** | HTML templates for API frontend. |
+| **static/** | CSS/JS files for UI styling. |
+| **mlruns/** | MLflow tracking folder (auto-generated). |
 
 ---
 
-# Installation and run
+## 🔑 Key Components
 
-- pip install -r requirements.txt
-- python data/generate_data.py
-- python data/generate_production_data.py
-- python model/train_model.py
-- python monitoring/monitor.py
-- python retraining/retrain.py
-- uvicorn api.app:app --reload
+### 1. Drift Detection
+
+- **File:** `monitoring/drift_detection.py`  
+- Compares **reference data** (training) and **production data**.  
+- Uses the **Kolmogorov-Smirnov test** to detect shifts in feature distributions.  
+- If drift is detected, triggers the retraining pipeline.
+
+### 2. Retraining Loop
+
+- **File:** `retraining/retrain.py`  
+- Retrains the model on the latest data.  
+- Saves updated `model.pkl`.  
+- Logs experiment parameters, metrics, and model artifacts to **MLflow**.
+
+### 3. Experiment Tracking with MLflow
+
+- **Track every run:** `train_model.py` and `retrain.py` log metrics (`accuracy`), parameters (`model_type`, retrain status), and artifacts (saved model).  
+- **Compare runs:** Use MLflow UI to analyze improvements, retraining impact, or hyperparameter changes.  
+- **Model registry:** Optionally, register best-performing models for production deployment.
+
+### 4. Model Serving
+
+- **File:** `api/app.py`  
+- **Framework:** FastAPI  
+- Provides a **web form** to input features:  
+  - `transaction_amount`  
+  - `account_age_days`  
+  - `num_transactions`  
+- Returns **Fraudulent** or **Legitimate Transaction** predictions.  
+- Optional: API can log predictions to MLflow for monitoring.
+
+---
+
+## 💻 Installation & Running the Project
+
+1. **Clone the repository**:
+
+```bash
+git clone <your-repo-url>
+cd drift_detection_system
