@@ -40,4 +40,8 @@ with mlflow.start_run():
     os.makedirs("model", exist_ok=True)
     joblib.dump(model, MODEL_PATH)
     print(f"Model trained and saved at {MODEL_PATH}")
+<<<<<<< HEAD
     print(f"Accuracy: {acc}")
+=======
+    print(f"Accuracy: {acc}")
+>>>>>>> 0e5634b3d0a42a27607c4a0b743ec264719da898

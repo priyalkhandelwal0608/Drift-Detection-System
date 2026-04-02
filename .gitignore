@@ -1,0 +1,11 @@
+# Virtual environment
+venv/
+__pycache__/
+
+# MLflow tracking outputs
+mlruns/
+*.db
+
+# OS-specific files
+.DS_Store
+Thumbs.db

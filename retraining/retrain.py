@@ -54,4 +54,8 @@ with mlflow.start_run():
     # Save retrained model
     joblib.dump(model, MODEL_PATH)
     print(f"Model retrained and saved at {MODEL_PATH}")
+<<<<<<< HEAD
     print(f"Accuracy: {acc}")
+=======
+    print(f"Accuracy: {acc}")
+>>>>>>> 0e5634b3d0a42a27607c4a0b743ec264719da898
