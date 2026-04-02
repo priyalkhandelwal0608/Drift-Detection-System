@@ -3,41 +3,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import joblib
 import os
+import mlflow
+import mlflow.sklearn
 
-def retrain():
-    # Paths relative to project root
-    REFERENCE = os.path.join("data", "reference_data.csv")
-    MODEL_PATH = os.path.join("model", "model.pkl")
+REFERENCE = os.path.join("data", "reference_data.csv")
+MODEL_PATH = os.path.join("model", "model.pkl")
 
-    # Check if reference dataset exists
-    if not os.path.exists(REFERENCE):
-        raise FileNotFoundError(
-            f"Reference dataset not found at {REFERENCE}. "
-            f"Run 'python data/generate_data.py' first."
-        )
+if not os.path.exists(REFERENCE):
+    raise FileNotFoundError(f"Reference dataset not found at {REFERENCE}")
 
-    # Load reference dataset
-    ref = pd.read_csv(REFERENCE)
+ref = pd.read_csv(REFERENCE)
+X = ref[["transaction_amount", "account_age_days", "num_transactions"]]
+y = ref["fraud"]
 
-    # Features and target
-    if "fraud" not in ref.columns:
-        raise ValueError("Reference dataset must contain a 'fraud' column as target.")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    X = ref[["transaction_amount", "account_age_days", "num_transactions"]]
-    y = ref["fraud"]
-
-    # Train/test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # Retrain model
+with mlflow.start_run():
     model = RandomForestClassifier(random_state=42)
     model.fit(X_train, y_train)
-
-    # Save updated model
+    
+    acc = model.score(X_test, y_test)
+    
+    mlflow.log_param("retrain", True)
+    mlflow.log_metric("accuracy", acc)
+    mlflow.sklearn.log_model(model, "model")
+    
     joblib.dump(model, MODEL_PATH)
     print(f"Model retrained and saved at {MODEL_PATH}")
-
-if __name__ == "__main__":
-    retrain()
+    print(f"Accuracy: {acc}")
