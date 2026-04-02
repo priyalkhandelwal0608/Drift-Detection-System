@@ -3,33 +3,34 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import joblib
 import os
+import mlflow
+import mlflow.sklearn
 
-# Path to reference dataset (relative to project root)
+# Paths
 DATA_PATH = os.path.join("data", "reference_data.csv")
+MODEL_PATH = os.path.join("model", "model.pkl")
 
-# Check if dataset exists
 if not os.path.exists(DATA_PATH):
-    raise FileNotFoundError(f"Reference dataset not found at {DATA_PATH}. "
-                            f"Run 'python data/generate_data.py' first.")
+    raise FileNotFoundError(f"Reference dataset not found at {DATA_PATH}")
 
-# Load reference dataset
 data = pd.read_csv(DATA_PATH)
-
-# Use only the 3 features present in your dataset
 X = data[["transaction_amount", "account_age_days", "num_transactions"]]
 y = data["fraud"]
 
-# Train/test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train model
-model = RandomForestClassifier(random_state=42)
-model.fit(X_train, y_train)
-
-# Save model inside model/ folder
-MODEL_PATH = os.path.join("model", "model.pkl")
-joblib.dump(model, MODEL_PATH)
-
-print(f"Model trained and saved at {MODEL_PATH}")
+with mlflow.start_run():
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    
+    acc = model.score(X_test, y_test)
+    
+    # Log parameters, metrics, and model
+    mlflow.log_param("model_type", "RandomForestClassifier")
+    mlflow.log_metric("accuracy", acc)
+    mlflow.sklearn.log_model(model, "model")
+    
+    # Save locally
+    joblib.dump(model, MODEL_PATH)
+    print(f"Model trained and saved at {MODEL_PATH}")
+    print(f"Accuracy: {acc}")
